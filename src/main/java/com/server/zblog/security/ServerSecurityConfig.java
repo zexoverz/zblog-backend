@@ -56,7 +56,7 @@ public class ServerSecurityConfig extends WebSecurityConfigurerAdapter  {
     }
 
 
-    public class CustomCorsFilter extends CorsFilter {
+    public static class CustomCorsFilter extends CorsFilter {
 
         public CustomCorsFilter() {
             super(configurationSource());
