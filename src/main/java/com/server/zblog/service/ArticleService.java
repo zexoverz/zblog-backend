@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ArticleService {
@@ -19,5 +20,13 @@ public class ArticleService {
 
     public Object storeArticle (Article reqData) {
         return articleRepository.save(reqData);
+    }
+
+    public Optional<Article> getArticle(Long articleId) {
+        return articleRepository.findById(articleId);
+    }
+
+    public void deleteArticle(Long id) {
+        articleRepository.deleteById(id);
     }
 }

@@ -53,7 +53,7 @@ public class UserController {
                 responsePacket = new ResultDTO<>(userService.createUser(userCreate), "User registered Successfully", true);
                 return new ResponseEntity<>(responsePacket, HttpStatus.OK);
             } else {
-                responsePacket = new ResultDTO<>("Record already exist", false);
+                responsePacket = new ResultDTO<>("User already exist", false);
                 return new ResponseEntity<>(responsePacket, HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {

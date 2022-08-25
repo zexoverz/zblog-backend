@@ -36,7 +36,9 @@ public class BeanValidator {
     public ArrayList<String> articleValidate(ArticleCreationReq article) {
         ArrayList<String> arrayList = new ArrayList<>();
         Set<ConstraintViolation<ArticleCreationReq>> constraintViolations = getValidator().validate(article);
+        System.out.println(constraintViolations);
         for (ConstraintViolation<ArticleCreationReq> constraintViolation : constraintViolations) {
+            System.out.println(constraintViolation.getPropertyPath().toString());
             if (constraintViolation.getPropertyPath().toString().equals("userId")) {
                 arrayList.add(constraintViolation.getMessage());
             }
@@ -47,6 +49,12 @@ public class BeanValidator {
                 arrayList.add(constraintViolation.getMessage());
             }
             if (constraintViolation.getPropertyPath().toString().equals("imgUrl")) {
+                arrayList.add(constraintViolation.getMessage());
+            }
+            if (constraintViolation.getPropertyPath().toString().equals("description")) {
+                arrayList.add(constraintViolation.getMessage());
+            }
+            if (constraintViolation.getPropertyPath().toString().equals("categories")) {
                 arrayList.add(constraintViolation.getMessage());
             }
         }

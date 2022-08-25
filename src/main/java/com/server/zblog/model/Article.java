@@ -2,6 +2,7 @@ package com.server.zblog.model;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.server.zblog.bean.CommentDTO;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonManagedReference
@@ -37,14 +39,15 @@ public class Article {
     @Lob
     private String content;
 
+
     @NotEmpty(message = "ImgUrl must not be empty")
     private String imgUrl;
 
+    @NotEmpty(message = "Description must not be empty")
+    private String description;
+
     private ArrayList<String> categories;
-
-    private ArrayList<Long> likes;
-
-    private ArrayList<CommentDTO> comments;
+    private ArrayList<String> views;
 
 
     @CreationTimestamp //this adds the default timestamp on save
