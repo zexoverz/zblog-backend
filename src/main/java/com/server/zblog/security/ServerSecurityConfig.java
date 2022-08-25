@@ -6,20 +6,16 @@ import com.server.zblog.security.services.AuthenticationUserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -39,20 +35,11 @@ public class ServerSecurityConfig extends WebSecurityConfigurerAdapter  {
         authenticationFilter.setFilterProcessesUrl("/user/login");
 
 
-        http.cors().configurationSource(c -> {
-                    CorsConfiguration corsCfg = new CorsConfiguration();
-
-                    // All origins, or specify the origins you need
-                    corsCfg.addAllowedOriginPattern( "*" );
-
-                    // If you really want to allow all methods
-                    corsCfg.addAllowedMethod( CorsConfiguration.ALL );
-
-                    return corsCfg;
-                }).and().csrf().disable().authorizeRequests()
+        http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers("/user/**", "/article/getAll", "/article/getDetail/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .addFilterBefore(corsFilter(), ChannelProcessingFilter.class)
                 .addFilter(authenticationFilter)
                 .addFilter(new JWTAuthorizationFilter(authenticationManager()))
                 // this disables session creation on Spring Security
@@ -62,14 +49,28 @@ public class ServerSecurityConfig extends WebSecurityConfigurerAdapter  {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(authenticationUserDetailService).passwordEncoder(bCryptPasswordEncoder());
     }
+
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    protected CorsFilter corsFilter()
+    {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
-        source.registerCorsConfiguration("/**", corsConfiguration);
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOriginPattern("*");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("OPTIONS");
+        config.addAllowedMethod("HEAD");
+        config.addAllowedMethod("GET");
+        config.addAllowedMethod("PUT");
+        config.addAllowedMethod("POST");
+        config.addAllowedMethod("DELETE");
+        config.addAllowedMethod("PATCH");
+        config.addExposedHeader("Location");
 
-        return source;
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
     }
 
 
