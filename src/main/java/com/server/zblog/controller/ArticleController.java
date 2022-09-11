@@ -2,11 +2,14 @@ package com.server.zblog.controller;
 
 
 import com.server.zblog.bean.BeanValidator;
+import com.server.zblog.bean.CommentDTO;
 import com.server.zblog.bean.ResultDTO;
 import com.server.zblog.model.Article;
+import com.server.zblog.model.Comment;
 import com.server.zblog.model.User;
 import com.server.zblog.req.ArticleCreationReq;
 import com.server.zblog.service.ArticleService;
+import com.server.zblog.service.CommentService;
 import com.server.zblog.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,9 @@ public class ArticleController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CommentService commentService;
 
     @Autowired
     private ArticleService articleService;
@@ -118,11 +124,52 @@ public class ArticleController {
                     return new ResponseEntity<>(responsePacket, HttpStatus.BAD_REQUEST);
                 }else{
                     views.add((String) principal);
+                    articleDb.setViews(views);
                     articleService.storeArticle(articleDb);
                     responsePacket = new ResultDTO<>(null, "First View!!", true);
                     return new ResponseEntity<>(responsePacket, HttpStatus.OK);
                 }
 
+            }
+        } catch (Exception e) {
+            responsePacket = new ResultDTO<>(e.getMessage(), false);
+            return new ResponseEntity<>(responsePacket, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/addComment/{articleId}")
+    public ResponseEntity<?> addComment(@PathVariable("articleId") Long articleId, @RequestBody CommentDTO reqData) {
+        System.out.println(":::  ArticleController.addComment :::");
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+
+        ResultDTO<?> responsePacket = null;
+
+        try {
+            Optional<Article> article = articleService.getArticle(articleId);
+            User user = userService.isDataExist(reqData.getUsername());
+
+            if(!article.isPresent()){
+                responsePacket = new ResultDTO<>("Article not found", false);
+                return new ResponseEntity<>(responsePacket, HttpStatus.BAD_REQUEST);
+            }else if (user == null) {
+                responsePacket = new ResultDTO<>("User not found", false);
+                return new ResponseEntity<>(responsePacket, HttpStatus.BAD_REQUEST);
+            }else if (!principal.toString().equals(reqData.getUsername())){
+                responsePacket = new ResultDTO<>("You are not authorized", false);
+                return new ResponseEntity<>(responsePacket, HttpStatus.BAD_REQUEST);
+            }
+            else {
+                Article articleDb = article.get();
+                Comment comment = new Comment();
+                BeanUtils.copyProperties(reqData, comment);
+                comment.setArticle(articleDb);
+
+                commentService.storeComment(comment);
+
+                responsePacket = new ResultDTO<>("Comment Created Successfully", true);
+                return new ResponseEntity<>(responsePacket, HttpStatus.OK);
             }
         } catch (Exception e) {
             responsePacket = new ResultDTO<>(e.getMessage(), false);

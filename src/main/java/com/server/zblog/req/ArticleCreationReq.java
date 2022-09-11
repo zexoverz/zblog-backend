@@ -1,6 +1,7 @@
 package com.server.zblog.req;
 
 
+import com.server.zblog.bean.CommentDTO;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -15,4 +16,5 @@ public class ArticleCreationReq {
     private String createdBy;
     private ArrayList<String> categories;
     private ArrayList<String> views;
+    private ArrayList<CommentDTO> comments;
 }

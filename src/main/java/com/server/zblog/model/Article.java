@@ -49,6 +49,11 @@ public class Article {
     private ArrayList<String> categories;
     private ArrayList<String> views;
 
+    @JsonManagedReference
+    @OneToMany( mappedBy = "article",
+            cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<Comment>();
+
 
     @CreationTimestamp //this adds the default timestamp on save
     private Timestamp createDate;
